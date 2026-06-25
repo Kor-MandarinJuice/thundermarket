@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { STATUS_OPTIONS, MAX_IMAGES, type Product } from "@/lib/products";
@@ -39,8 +45,14 @@ export function ProductForm({
   const [previews, setPreviews] = useState<string[]>([]);
   const [imgError, setImgError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // 붙여넣기 핸들러에서 최신 files를 참조하기 위한 보관용
+  const filesRef = useRef<File[]>([]);
 
   const total = keep.length + files.length;
+
+  useEffect(() => {
+    filesRef.current = files;
+  }, [files]);
 
   // 새 파일 미리보기 URL 만들기/정리
   useEffect(() => {
@@ -57,28 +69,60 @@ export function ProductForm({
     inputRef.current.files = dt.files;
   }, [files]);
 
-  function handlePick(e: React.ChangeEvent<HTMLInputElement>) {
-    const picked = Array.from(e.target.files ?? []);
-    const merged = [...files];
-    for (const f of picked) {
-      const dup = merged.some(
-        (m) =>
-          m.name === f.name &&
-          m.size === f.size &&
-          m.lastModified === f.lastModified,
-      );
-      if (!dup) merged.push(f);
-    }
+  // 파일 선택/붙여넣기 공통: 이미지 파일들을 목록에 추가
+  const addFiles = useCallback(
+    (picked: File[]) => {
+      const imgs = picked.filter((f) => f.type.startsWith("image/"));
+      if (imgs.length === 0) return;
 
-    const room = MAX_IMAGES - keep.length;
-    if (merged.length > room) {
-      setImgError(`사진은 최대 ${MAX_IMAGES}장까지야.`);
-      setFiles(merged.slice(0, Math.max(room, 0)));
-    } else {
-      setImgError(null);
-      setFiles(merged);
-    }
+      const merged = [...filesRef.current];
+      for (const f of imgs) {
+        const dup = merged.some(
+          (m) =>
+            m.name === f.name &&
+            m.size === f.size &&
+            m.lastModified === f.lastModified,
+        );
+        if (!dup) merged.push(f);
+      }
+
+      const room = MAX_IMAGES - keep.length;
+      if (merged.length > room) {
+        setImgError(`사진은 최대 ${MAX_IMAGES}장까지야.`);
+        setFiles(merged.slice(0, Math.max(room, 0)));
+      } else {
+        setImgError(null);
+        setFiles(merged);
+      }
+    },
+    [keep.length],
+  );
+
+  function handlePick(e: React.ChangeEvent<HTMLInputElement>) {
+    addFiles(Array.from(e.target.files ?? []));
   }
+
+  // 복사한 이미지를 Ctrl+V로 붙여넣기
+  useEffect(() => {
+    function onPaste(e: ClipboardEvent) {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      const picked: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.kind === "file" && item.type.startsWith("image/")) {
+          const f = item.getAsFile();
+          if (f) picked.push(f);
+        }
+      }
+      if (picked.length > 0) {
+        e.preventDefault();
+        addFiles(picked);
+      }
+    }
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [addFiles]);
 
   function removeNew(idx: number) {
     setImgError(null);
@@ -168,7 +212,13 @@ export function ProductForm({
           className="block w-full cursor-pointer text-sm text-muted file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-surface-2 file:px-4 file:py-2 file:text-sm file:text-foreground hover:file:bg-border disabled:opacity-50"
         />
         <p className="mt-1.5 text-xs text-muted">
-          jpg · png · webp · gif / 한 장당 5MB 이하
+          jpg · png · webp · gif / 한 장당 5MB 이하 · 복사한 이미지를{" "}
+          <kbd className="rounded border border-border bg-surface-2 px-1">
+            Ctrl
+          </kbd>
+          +
+          <kbd className="rounded border border-border bg-surface-2 px-1">V</kbd>{" "}
+          로 붙여넣기도 가능
         </p>
         {imgError && (
           <p className="mt-1.5 text-xs text-hero-red">⚠ {imgError}</p>
