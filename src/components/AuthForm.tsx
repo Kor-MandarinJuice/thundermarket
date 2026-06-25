@@ -67,7 +67,7 @@ export function AuthForm({
               name="nickname"
               type="text"
               required
-              placeholder="예) 천둥용사다간"
+              placeholder="용사님이름을입력해주세요"
               className="input-mecha w-full rounded-md px-4 py-3"
             />
           </label>
