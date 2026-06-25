@@ -50,10 +50,10 @@ export default async function Home({
                 준비 완료!
               </span>
               <Link
-                href="/"
+                href="/products"
                 className="btn-thunder rounded-md px-6 py-3 text-center text-sm"
               >
-                상품 둘러보기 (준비 중)
+                상품 둘러보기
               </Link>
             </>
           ) : (

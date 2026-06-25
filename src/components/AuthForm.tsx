@@ -21,9 +21,11 @@ function SubmitButton({ label }: { label: string }) {
 export function AuthForm({
   mode,
   notice,
+  next,
 }: {
   mode: "login" | "signup";
   notice?: string;
+  next?: string;
 }) {
   const isSignup = mode === "signup";
   const action = isSignup ? signup : login;
@@ -58,6 +60,7 @@ export function AuthForm({
       )}
 
       <form action={formAction} className="card-mecha rounded-xl p-6">
+        {!isSignup && next && <input type="hidden" name="next" value={next} />}
         {isSignup && (
           <label className="mb-4 block">
             <span className="mb-1.5 block text-sm font-medium text-muted">

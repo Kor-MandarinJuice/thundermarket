@@ -53,6 +53,9 @@ export async function login(
 ): Promise<AuthState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  // 로그인 후 돌아갈 곳 (없으면 홈). 외부 주소로 못 가게 "/"로 시작하는 내부 경로만 허용.
+  const nextRaw = String(formData.get("next") ?? "");
+  const next = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/";
 
   if (!email || !password) {
     return { error: "이메일과 비밀번호를 입력해줘!" };
@@ -66,7 +69,7 @@ export async function login(
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect(next);
 }
 
 // 로그아웃

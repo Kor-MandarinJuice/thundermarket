@@ -23,8 +23,20 @@ export async function Header() {
         </Link>
 
         <nav className="flex items-center gap-3 text-sm">
+          <Link
+            href="/products"
+            className="text-muted transition-colors hover:text-foreground"
+          >
+            장터
+          </Link>
           {user ? (
             <>
+              <Link
+                href="/products/new"
+                className="hidden rounded-md border border-border px-3 py-1.5 text-muted transition-colors hover:border-thunder hover:text-foreground sm:inline-block"
+              >
+                판매하기
+              </Link>
               <span className="hidden text-muted sm:inline">
                 <b className="text-foreground">{nickname}</b> 용사님
               </span>
