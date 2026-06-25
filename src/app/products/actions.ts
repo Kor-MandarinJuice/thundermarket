@@ -44,8 +44,8 @@ function parseProductForm(formData: FormData):
   if (!Number.isInteger(price) || price < 0) {
     return { ok: false, error: "가격은 0 이상의 숫자로 입력해줘." };
   }
-  if (price > 1_000_000_000) {
-    return { ok: false, error: "가격이 너무 커! 10억 원 이하로 적어줘." };
+  if (price > 10_000_000_000_000) {
+    return { ok: false, error: "가격이 너무 커! 10조 원 이하로 적어줘." };
   }
 
   if (!VALID_STATUS.includes(status)) {
