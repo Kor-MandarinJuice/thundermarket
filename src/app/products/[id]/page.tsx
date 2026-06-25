@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { deleteProduct } from "@/app/products/actions";
+import { ProductGallery } from "@/components/ProductGallery";
 import {
   formatPrice,
   statusLabel,
@@ -51,6 +52,10 @@ export default async function ProductDetailPage({
       </Link>
 
       <article className="card-mecha rounded-xl p-7">
+        <div className="mb-6">
+          <ProductGallery images={p.image_urls ?? []} title={p.title} />
+        </div>
+
         <div className="mb-4 flex items-start justify-between gap-3">
           <h1 className="font-display text-2xl leading-snug tracking-wide">
             {p.title}

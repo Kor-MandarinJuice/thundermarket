@@ -6,6 +6,7 @@ import {
   timeAgo,
   type Product,
 } from "@/lib/products";
+import { RefreshButton } from "@/components/RefreshButton";
 
 export const metadata = {
   title: "상품 둘러보기 · 천둥마켓",
@@ -49,9 +50,12 @@ export default async function ProductsPage() {
             우리 동네 용사들의 거래 목록
           </p>
         </div>
-        <Link href="/products/new" className="btn-thunder rounded-md px-5 py-2.5 text-sm">
-          ⚡ 판매하기
-        </Link>
+        <div className="flex items-center gap-2">
+          <RefreshButton />
+          <Link href="/products/new" className="btn-thunder rounded-md px-5 py-2.5 text-sm">
+            ⚡ 판매하기
+          </Link>
+        </div>
       </div>
 
       {list.length === 0 ? (
@@ -76,8 +80,28 @@ export default async function ProductsPage() {
             <li key={p.id}>
               <Link
                 href={`/products/${p.id}`}
-                className="card-mecha block h-full rounded-xl p-5 transition-colors hover:border-thunder"
+                className="card-mecha block h-full overflow-hidden rounded-xl transition-colors hover:border-thunder"
               >
+                <div className="relative aspect-[4/3] bg-surface-2">
+                  {p.image_urls?.[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={p.image_urls[0]}
+                      alt={p.title}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-3xl text-muted">
+                      📦
+                    </div>
+                  )}
+                  {p.image_urls?.length > 1 && (
+                    <span className="absolute bottom-2 right-2 rounded-full bg-black/65 px-2 py-0.5 text-xs text-white">
+                      📷 {p.image_urls.length}
+                    </span>
+                  )}
+                </div>
+                <div className="p-5">
                 <div className="mb-3 flex items-start justify-between gap-2">
                   <h2 className="line-clamp-2 font-display text-lg leading-snug tracking-wide">
                     {p.title}
@@ -94,6 +118,7 @@ export default async function ProductsPage() {
                   <span className="text-xs text-muted">
                     {p.seller_nickname} · {timeAgo(p.created_at)}
                   </span>
+                </div>
                 </div>
               </Link>
             </li>

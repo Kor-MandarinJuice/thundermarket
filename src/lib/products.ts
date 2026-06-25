@@ -10,9 +10,14 @@ export type Product = {
   description: string;
   price: number;
   status: ProductStatus;
+  image_urls: string[];
   created_at: string;
   updated_at: string;
 };
+
+// 사진 업로드 제한
+export const MAX_IMAGES = 5;
+export const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
 
 // 판매 상태 선택지 (화면 표시용 라벨 포함)
 export const STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [

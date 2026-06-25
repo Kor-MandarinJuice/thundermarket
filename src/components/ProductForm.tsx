@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
-import { STATUS_OPTIONS, type Product } from "@/lib/products";
+import { STATUS_OPTIONS, MAX_IMAGES, type Product } from "@/lib/products";
 import type { ProductFormState } from "@/app/products/actions";
 
 function SubmitButton({ label }: { label: string }) {
@@ -24,7 +24,6 @@ export function ProductForm({
   product,
   submitLabel,
 }: {
-  // 글쓰기/수정 둘 다 (prevState, formData) => state 형태
   action: (prev: ProductFormState, formData: FormData) => Promise<ProductFormState>;
   product?: Product;
   submitLabel: string;
@@ -33,6 +32,63 @@ export function ProductForm({
     action,
     null,
   );
+
+  // 기존 사진(수정 시) 중 유지할 것 / 새로 추가할 파일
+  const [keep, setKeep] = useState<string[]>(product?.image_urls ?? []);
+  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [imgError, setImgError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const total = keep.length + files.length;
+
+  // 새 파일 미리보기 URL 만들기/정리
+  useEffect(() => {
+    const urls = files.map((f) => URL.createObjectURL(f));
+    setPreviews(urls);
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, [files]);
+
+  // files 상태를 실제 <input>에 반영해서 폼 제출 시 함께 전송
+  useEffect(() => {
+    if (!inputRef.current) return;
+    const dt = new DataTransfer();
+    files.forEach((f) => dt.items.add(f));
+    inputRef.current.files = dt.files;
+  }, [files]);
+
+  function handlePick(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = Array.from(e.target.files ?? []);
+    const merged = [...files];
+    for (const f of picked) {
+      const dup = merged.some(
+        (m) =>
+          m.name === f.name &&
+          m.size === f.size &&
+          m.lastModified === f.lastModified,
+      );
+      if (!dup) merged.push(f);
+    }
+
+    const room = MAX_IMAGES - keep.length;
+    if (merged.length > room) {
+      setImgError(`사진은 최대 ${MAX_IMAGES}장까지야.`);
+      setFiles(merged.slice(0, Math.max(room, 0)));
+    } else {
+      setImgError(null);
+      setFiles(merged);
+    }
+  }
+
+  function removeNew(idx: number) {
+    setImgError(null);
+    setFiles((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  function removeExisting(url: string) {
+    setImgError(null);
+    setKeep((prev) => prev.filter((u) => u !== url));
+  }
 
   return (
     <form action={formAction} className="card-mecha rounded-xl p-6">
@@ -48,6 +104,76 @@ export function ProductForm({
           className="input-mecha w-full rounded-md px-4 py-3"
         />
       </label>
+
+      {/* 사진 영역 */}
+      <div className="mb-4">
+        <span className="mb-1.5 block text-sm font-medium text-muted">
+          사진 ({total}/{MAX_IMAGES}) · 최소 1장
+        </span>
+
+        {(keep.length > 0 || previews.length > 0) && (
+          <div className="mb-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {/* 유지 중인 기존 사진 */}
+            {keep.map((url) => (
+              <div key={url} className="group relative aspect-square">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt="기존 사진"
+                  className="h-full w-full rounded-md border border-border object-cover"
+                />
+                <input type="hidden" name="keepImages" value={url} />
+                <button
+                  type="button"
+                  onClick={() => removeExisting(url)}
+                  className="absolute right-1 top-1 rounded-full bg-black/70 px-2 py-0.5 text-xs text-white hover:bg-hero-red"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+
+            {/* 새로 추가한 사진 미리보기 */}
+            {previews.map((url, i) => (
+              <div key={url} className="group relative aspect-square">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt="새 사진"
+                  className="h-full w-full rounded-md border border-thunder/50 object-cover"
+                />
+                <span className="absolute left-1 top-1 rounded bg-thunder/90 px-1 text-[10px] font-bold text-black">
+                  NEW
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeNew(i)}
+                  className="absolute right-1 top-1 rounded-full bg-black/70 px-2 py-0.5 text-xs text-white hover:bg-hero-red"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <input
+          ref={inputRef}
+          name="images"
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          multiple
+          onChange={handlePick}
+          disabled={total >= MAX_IMAGES}
+          className="block w-full cursor-pointer text-sm text-muted file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-surface-2 file:px-4 file:py-2 file:text-sm file:text-foreground hover:file:bg-border disabled:opacity-50"
+        />
+        <p className="mt-1.5 text-xs text-muted">
+          jpg · png · webp · gif / 한 장당 5MB 이하
+        </p>
+        {imgError && (
+          <p className="mt-1.5 text-xs text-hero-red">⚠ {imgError}</p>
+        )}
+      </div>
 
       <label className="mb-4 block">
         <span className="mb-1.5 block text-sm font-medium text-muted">
