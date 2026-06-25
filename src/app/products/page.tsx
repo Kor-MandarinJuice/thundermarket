@@ -4,7 +4,7 @@ import {
   formatPrice,
   statusLabel,
   timeAgo,
-  type Product,
+  type ProductWithCounts,
 } from "@/lib/products";
 import { RefreshButton } from "@/components/RefreshButton";
 
@@ -33,11 +33,11 @@ export default async function ProductsPage() {
   } = await supabase.auth.getUser();
 
   const { data: products } = await supabase
-    .from("products")
+    .from("products_with_counts")
     .select("*")
     .order("created_at", { ascending: false });
 
-  const list = (products ?? []) as Product[];
+  const list = (products ?? []) as ProductWithCounts[];
 
   return (
     <div className="mx-auto w-full max-w-5xl flex-1 px-5 py-12">
@@ -118,6 +118,10 @@ export default async function ProductsPage() {
                   <span className="text-xs text-muted">
                     {p.seller_nickname} · {timeAgo(p.created_at)}
                   </span>
+                </div>
+                <div className="mt-2 flex gap-3 text-xs text-muted">
+                  <span>❤️ {p.like_count}</span>
+                  <span>💬 {p.comment_count}</span>
                 </div>
                 </div>
               </Link>

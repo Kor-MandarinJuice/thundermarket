@@ -15,6 +15,12 @@ export type Product = {
   updated_at: string;
 };
 
+// 목록용: 좋아요/댓글 수가 포함된 형태
+export type ProductWithCounts = Product & {
+  like_count: number;
+  comment_count: number;
+};
+
 // 사진 업로드 제한
 export const MAX_IMAGES = 5;
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB

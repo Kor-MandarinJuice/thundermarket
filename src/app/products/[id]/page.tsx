@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { deleteProduct } from "@/app/products/actions";
 import { ProductGallery } from "@/components/ProductGallery";
+import { PostLikeButton } from "@/components/PostLikeButton";
+import { CommentsSection } from "@/components/CommentsSection";
 import {
   formatPrice,
   statusLabel,
@@ -34,6 +36,23 @@ export default async function ProductDetailPage({
 
   const p = product as Product;
   const isOwner = user?.id === p.seller_id;
+
+  // 좋아요 개수 + 내가 눌렀는지
+  const { count: likeCount } = await supabase
+    .from("product_likes")
+    .select("*", { count: "exact", head: true })
+    .eq("product_id", id);
+
+  let userLiked = false;
+  if (user) {
+    const { data: myLike } = await supabase
+      .from("product_likes")
+      .select("user_id")
+      .eq("product_id", id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    userLiked = !!myLike;
+  }
 
   const statusStyle =
     p.status === "sold"
@@ -83,6 +102,14 @@ export default async function ProductDetailPage({
         </div>
       </article>
 
+      <div className="mt-5 flex justify-center">
+        <PostLikeButton
+          productId={p.id}
+          liked={userLiked}
+          count={likeCount ?? 0}
+        />
+      </div>
+
       {isOwner && (
         <div className="mt-5 flex gap-3">
           <Link
@@ -102,6 +129,8 @@ export default async function ProductDetailPage({
           </form>
         </div>
       )}
+
+      <CommentsSection productId={p.id} />
     </div>
   );
 }
