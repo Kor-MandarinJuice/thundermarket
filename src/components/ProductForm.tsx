@@ -29,10 +29,12 @@ export function ProductForm({
   action,
   product,
   submitLabel,
+  nickname,
 }: {
   action: (prev: ProductFormState, formData: FormData) => Promise<ProductFormState>;
   product?: Product;
   submitLabel: string;
+  nickname: string;
 }) {
   const [state, formAction] = useActionState<ProductFormState, FormData>(
     action,
@@ -256,6 +258,34 @@ export function ProductForm({
           ))}
         </select>
       </label>
+
+      <div className="mb-4">
+        <span className="mb-1.5 block text-sm font-medium text-muted">
+          작성자 표시
+        </span>
+        <div className="flex gap-3">
+          <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-md border border-border bg-surface-2 px-4 py-3 text-sm has-[:checked]:border-thunder has-[:checked]:bg-thunder/10">
+            <input
+              type="radio"
+              name="is_anonymous"
+              value="true"
+              defaultChecked={product ? product.is_anonymous : true}
+              className="accent-thunder"
+            />
+            <span>🕶 익명</span>
+          </label>
+          <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-md border border-border bg-surface-2 px-4 py-3 text-sm has-[:checked]:border-thunder has-[:checked]:bg-thunder/10">
+            <input
+              type="radio"
+              name="is_anonymous"
+              value="false"
+              defaultChecked={product ? !product.is_anonymous : false}
+              className="accent-thunder"
+            />
+            <span>🛡 닉네임 공개 ({nickname})</span>
+          </label>
+        </div>
+      </div>
 
       <label className="block">
         <span className="mb-1.5 block text-sm font-medium text-muted">

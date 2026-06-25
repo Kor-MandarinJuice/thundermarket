@@ -25,7 +25,16 @@ type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
 // 폼에서 공통으로 값을 꺼내고 검증
 function parseProductForm(formData: FormData):
-  | { ok: true; values: { title: string; description: string; price: number; status: string } }
+  | {
+      ok: true;
+      values: {
+        title: string;
+        description: string;
+        price: number;
+        status: string;
+        isAnonymous: boolean;
+      };
+    }
   | { ok: false; error: string } {
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
@@ -52,7 +61,13 @@ function parseProductForm(formData: FormData):
     return { ok: false, error: "판매 상태가 올바르지 않아." };
   }
 
-  return { ok: true, values: { title, description, price, status } };
+  // 작성자 표시: 기본은 익명. "false"일 때만 닉네임 공개.
+  const isAnonymous = String(formData.get("is_anonymous") ?? "true") !== "false";
+
+  return {
+    ok: true,
+    values: { title, description, price, status, isAnonymous },
+  };
 }
 
 // 폼에서 실제로 올라온 사진 파일만 추려냄
@@ -158,6 +173,7 @@ export async function createProduct(
       description: parsed.values.description,
       price: parsed.values.price,
       status: parsed.values.status,
+      is_anonymous: parsed.values.isAnonymous,
       image_urls: uploaded.urls,
     })
     .select("id")
@@ -239,6 +255,7 @@ export async function updateProduct(
       description: parsed.values.description,
       price: parsed.values.price,
       status: parsed.values.status,
+      is_anonymous: parsed.values.isAnonymous,
       image_urls: finalUrls,
     })
     .eq("id", id)

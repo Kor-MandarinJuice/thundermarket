@@ -18,6 +18,11 @@ export default async function NewProductPage() {
     redirect("/login?next=/products/new");
   }
 
+  const nickname =
+    (user.user_metadata?.nickname as string | undefined) ??
+    user.email?.split("@")[0] ??
+    "익명 용사";
+
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 px-5 py-12">
       <div className="mb-6">
@@ -29,7 +34,11 @@ export default async function NewProductPage() {
         </p>
       </div>
 
-      <ProductForm action={createProduct} submitLabel="등록하기" />
+      <ProductForm
+        action={createProduct}
+        submitLabel="등록하기"
+        nickname={nickname}
+      />
     </div>
   );
 }

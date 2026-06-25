@@ -44,6 +44,11 @@ export default async function EditProductPage({
   // updateProduct(id, prevState, formData) 에서 id를 미리 채워줌
   const action = updateProduct.bind(null, id);
 
+  const nickname =
+    (user.user_metadata?.nickname as string | undefined) ??
+    user.email?.split("@")[0] ??
+    "익명 용사";
+
   return (
     <div className="mx-auto w-full max-w-2xl flex-1 px-5 py-12">
       <div className="mb-6">
@@ -53,7 +58,12 @@ export default async function EditProductPage({
         <p className="mt-1 text-sm text-muted">내용을 고치고 저장하자.</p>
       </div>
 
-      <ProductForm action={action} product={p} submitLabel="수정 저장" />
+      <ProductForm
+        action={action}
+        product={p}
+        submitLabel="수정 저장"
+        nickname={nickname}
+      />
     </div>
   );
 }

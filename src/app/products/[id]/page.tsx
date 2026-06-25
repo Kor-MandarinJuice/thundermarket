@@ -6,6 +6,7 @@ import { ProductGallery } from "@/components/ProductGallery";
 import { PostLikeButton } from "@/components/PostLikeButton";
 import { CommentsSection } from "@/components/CommentsSection";
 import {
+  authorName,
   formatPrice,
   statusLabel,
   timeAgo,
@@ -91,8 +92,8 @@ export default async function ProductDetailPage({
         </p>
 
         <div className="mt-4 flex items-center gap-2 border-b border-border pb-5 text-sm text-muted">
-          <span className="text-lg">🛡</span>
-          <b className="text-foreground">{p.seller_nickname}</b> 용사
+          <span className="text-lg">{p.is_anonymous ? "🕶" : "🛡"}</span>
+          <b className="text-foreground">{authorName(p)}</b> 용사
           <span className="mx-1">·</span>
           {timeAgo(p.created_at)}
         </div>

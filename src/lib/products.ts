@@ -11,9 +11,18 @@ export type Product = {
   price: number;
   status: ProductStatus;
   image_urls: string[];
+  is_anonymous: boolean;
   created_at: string;
   updated_at: string;
 };
+
+// 작성자 표시 이름: 익명이면 "익명", 아니면 닉네임
+export function authorName(p: {
+  is_anonymous: boolean;
+  seller_nickname: string;
+}): string {
+  return p.is_anonymous ? "익명" : p.seller_nickname;
+}
 
 // 목록용: 좋아요/댓글 수가 포함된 형태
 export type ProductWithCounts = Product & {

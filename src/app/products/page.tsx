@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import {
+  authorName,
   formatPrice,
   statusLabel,
   timeAgo,
@@ -116,7 +117,7 @@ export default async function ProductsPage() {
                     {formatPrice(p.price)}
                   </span>
                   <span className="text-xs text-muted">
-                    {p.seller_nickname} · {timeAgo(p.created_at)}
+                    {authorName(p)} · {timeAgo(p.created_at)}
                   </span>
                 </div>
                 <div className="mt-2 flex gap-3 text-xs text-muted">
