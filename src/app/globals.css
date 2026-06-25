@@ -1,26 +1,104 @@
 @import "tailwindcss";
 
+/*
+  천둥마켓 - "전설의 용사 다간" 컨셉 디자인 토큰
+  깊은 네이비 배경 + 번개 골드 + 히어로 레드 + 일렉트릭 블루
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0e1a; /* 심야의 네이비 */
+  --surface: #131a2e; /* 카드 표면 */
+  --surface-2: #1b2540;
+  --foreground: #eaf0ff;
+  --muted: #8a97b8;
+
+  --thunder: #ffd23f; /* 번개 골드 (메인) */
+  --thunder-deep: #f5a623;
+  --hero-red: #e63946; /* 히어로 레드 */
+  --electric: #2d6cdf; /* 일렉트릭 블루 */
+  --border: #2a3656;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-muted: var(--muted);
+  --color-thunder: var(--thunder);
+  --color-thunder-deep: var(--thunder-deep);
+  --color-hero-red: var(--hero-red);
+  --color-electric: var(--electric);
+  --color-border: var(--border);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--font-black-han-sans);
+  --font-sans: var(--font-noto-sans-kr);
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      rgba(45, 108, 223, 0.18),
+      transparent 55%
+    ),
+    var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* 번개 텍스트 그라데이션 (로고/포인트용) */
+.text-thunder-grad {
+  background: linear-gradient(135deg, var(--thunder) 0%, var(--thunder-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* 히어로 버튼 (다간 스타일: 각진 모서리 + 글로우) */
+.btn-thunder {
+  background: linear-gradient(135deg, var(--thunder) 0%, var(--thunder-deep) 100%);
+  color: #1a1205;
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  box-shadow: 0 0 0 rgba(255, 210, 63, 0);
+  transition: all 0.18s ease;
+}
+.btn-thunder:hover {
+  box-shadow: 0 6px 24px rgba(255, 210, 63, 0.35);
+  transform: translateY(-1px);
+}
+.btn-thunder:active {
+  transform: translateY(0);
+}
+
+/* 카드/입력창 공통 */
+.card-mecha {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  position: relative;
+}
+/* 카드 좌상단 번개 액센트 라인 */
+.card-mecha::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 56px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--thunder), transparent);
+}
+
+.input-mecha {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input-mecha::placeholder {
+  color: var(--muted);
+}
+.input-mecha:focus {
+  outline: none;
+  border-color: var(--thunder);
+  box-shadow: 0 0 0 3px rgba(255, 210, 63, 0.18);
 }
